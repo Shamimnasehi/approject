@@ -1,7 +1,30 @@
-import 'package:flutter/material.dart';
+import 'dart:io';
 import 'package:Daneshjooyar/screens/HomePage.dart';
+import 'package:flutter/material.dart';
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
+  @override
+  _LoginPageState createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  String response = '';
+
+  Future<String> login(String username, String password) async {
+    Socket socket = await Socket.connect("192.168.1.109", 8080);
+    socket.write('login~${username}~${password}\u0000');
+    socket.flush();
+
+    await socket.listen((socket) {
+      setState(() {
+        response = String.fromCharCodes(socket);
+      });
+    });
+    return response;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -96,6 +119,7 @@ class LoginPage extends StatelessWidget {
                                 ),
                               ),
                               child: TextField(
+                                controller: _usernameController,
                                 decoration: InputDecoration(
                                   hintText: "نام کاربری",
                                   hintStyle: TextStyle(
@@ -116,6 +140,8 @@ class LoginPage extends StatelessWidget {
                                 ),
                               ),
                               child: TextField(
+                                controller: _passwordController,
+                                obscureText: true,
                                 decoration: InputDecoration(
                                   hintText: "رمز عبور",
                                   hintStyle: TextStyle(
@@ -147,17 +173,18 @@ class LoginPage extends StatelessWidget {
                         color: Colors.teal.shade900,
                         borderRadius: BorderRadius.circular(10),
                         child: InkWell(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => HomePage(
-                                  name: 'shamim',
-                                  username: "shamimnasehi",
-                                  studentId: '402243124',
+                          onTap: () async {
+                            String username = _usernameController.text;
+                            String password = _passwordController.text;
+                            // String result = await login(username, password);
+                            // if (result == "found") {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => HomePage(studentId: _usernameController.text,),
                                 ),
-                              ),
-                            );
+                              );
+                            // }
                           },
                           child: Container(
                             padding: EdgeInsets.symmetric(vertical: 15),

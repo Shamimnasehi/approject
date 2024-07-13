@@ -1,18 +1,19 @@
-import 'package:flutter/material.dart';
+import 'dart:io';
+
 import 'package:Daneshjooyar/screens/News.dart';
+import 'package:Daneshjooyar/screens/TodoList.dart';
+import 'package:Daneshjooyar/screens/UserProfile.dart';
 import 'package:Daneshjooyar/screens/YourClasses.dart';
 import 'package:Daneshjooyar/screens/YourHomework.dart';
-import 'package:Daneshjooyar/screens/TodoList.dart';
-import '../models/Todo.dart';
-import 'UserProfile.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+
 
 class HomePage extends StatefulWidget {
-  final String name;
-  final String username;
   final String studentId;
 
   HomePage(
-      {required this.name, required this.username, required this.studentId});
+      {required this.studentId});
 
   @override
   _HomePageTestState createState() => _HomePageTestState();
@@ -20,6 +21,32 @@ class HomePage extends StatefulWidget {
 
 class _HomePageTestState extends State<HomePage> {
   int _currentIndex = 0;
+  String Id = '';
+  String response = '';
+  String Name = '';
+  String unitCounts = '';
+  String totalAvg = '';
+
+  Future<void> userinfo() async {
+    Socket socket = await Socket.connect("192.168.1.109", 8080);
+    socket.write('userinfo~${Id}\u0000');
+
+    await socket.listen((socket) {
+      setState(() {
+        response = String.fromCharCodes(socket);
+        List<String> list = response.split('~');
+        Name = list[0] + list[1];
+        unitCounts = list[3];
+        totalAvg = list[4];
+      });
+    });
+  }
+  @override
+  void initstate(){
+    super.initState();
+    Id = widget.studentId;
+    //userinfo();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +58,7 @@ class _HomePageTestState extends State<HomePage> {
           title: Padding(
             padding: const EdgeInsets.all(13.0),
             child: Text(
-              "کاربر ${widget.name} خوش آمدید ",
+              "کاربر ${Name} خوش آمدید ",
               style: TextStyle(
                   color: Colors.white,
                   letterSpacing: 2,
@@ -71,16 +98,6 @@ class _HomePageTestState extends State<HomePage> {
                       ),
                       Text(
                         'تعداد تمرین های نوشته نشده: 2',
-                        textAlign: TextAlign.right,
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'Baloo',
-                          color: Colors.teal.shade900,
-                        ),
-                      ),
-                      Text(
-                        'تعداد آزمون های پیش رو: 1',
                         textAlign: TextAlign.right,
                         style: TextStyle(
                           fontSize: 13,
@@ -177,10 +194,10 @@ class _HomePageTestState extends State<HomePage> {
                           },
                           style: ButtonStyle(
                             backgroundColor:
-                                MaterialStateProperty.all(Colors.teal.shade100),
+                            MaterialStateProperty.all(Colors.teal.shade100),
                             foregroundColor: MaterialStateProperty.all(Colors.teal),
                             shape:
-                                MaterialStateProperty.all<RoundedRectangleBorder>(
+                            MaterialStateProperty.all<RoundedRectangleBorder>(
                               RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10),
                               ),
@@ -189,10 +206,10 @@ class _HomePageTestState extends State<HomePage> {
                           child: Container(
                             margin: EdgeInsets.all(20),
                             child: Text('کلاس ها',
-                            style: TextStyle(
-                              fontFamily: 'Baloo',
-                              fontSize: 15,
-                            ),
+                              style: TextStyle(
+                                fontFamily: 'Baloo',
+                                fontSize: 15,
+                              ),
                             ),
                           ),
                         ),
@@ -212,10 +229,10 @@ class _HomePageTestState extends State<HomePage> {
                           },
                           style: ButtonStyle(
                             backgroundColor:
-                                MaterialStateProperty.all(Colors.teal.shade100),
+                            MaterialStateProperty.all(Colors.teal.shade100),
                             foregroundColor: MaterialStateProperty.all(Colors.teal),
                             shape:
-                                MaterialStateProperty.all<RoundedRectangleBorder>(
+                            MaterialStateProperty.all<RoundedRectangleBorder>(
                               RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10),
                               ),
@@ -255,10 +272,10 @@ class _HomePageTestState extends State<HomePage> {
                           },
                           style: ButtonStyle(
                             backgroundColor:
-                                MaterialStateProperty.all(Colors.teal.shade100),
+                            MaterialStateProperty.all(Colors.teal.shade100),
                             foregroundColor: MaterialStateProperty.all(Colors.teal),
                             shape:
-                                MaterialStateProperty.all<RoundedRectangleBorder>(
+                            MaterialStateProperty.all<RoundedRectangleBorder>(
                               RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10),
                               ),
@@ -269,8 +286,8 @@ class _HomePageTestState extends State<HomePage> {
                             child: Text(
                               'خبر ها',
                               style: TextStyle(
-                                  fontFamily: 'Baloo',
-                                  fontSize: 15,
+                                fontFamily: 'Baloo',
+                                fontSize: 15,
                               ),
                             ),
                           ),
@@ -291,10 +308,10 @@ class _HomePageTestState extends State<HomePage> {
                           },
                           style: ButtonStyle(
                             backgroundColor:
-                                MaterialStateProperty.all(Colors.teal.shade100),
+                            MaterialStateProperty.all(Colors.teal.shade100),
                             foregroundColor: MaterialStateProperty.all(Colors.teal),
                             shape:
-                                MaterialStateProperty.all<RoundedRectangleBorder>(
+                            MaterialStateProperty.all<RoundedRectangleBorder>(
                               RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10),
                               ),
@@ -329,7 +346,7 @@ class _HomePageTestState extends State<HomePage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => UserProfile(),
+                    builder: (context) => UserProfile(studentId: Id,)
                 ),
               );
             }

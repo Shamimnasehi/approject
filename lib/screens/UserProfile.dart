@@ -1,13 +1,55 @@
-import 'package:flutter/material.dart';
-import 'package:Daneshjooyar/screens/WelcomeScreen.dart';
+import 'dart:io';
 
-class UserProfile extends StatelessWidget {
+import 'package:Daneshjooyar/screens/WelcomeScreen.dart';
+import 'package:flutter/material.dart';
+
+class UserProfile extends StatefulWidget{
+  @override
+  UserProfile_Page createState() => UserProfile_Page();
+  final String studentId;
+
+  UserProfile(
+      {required this.studentId});
+}
+
+
+class UserProfile_Page extends State<UserProfile> {
+  String Id = '';
+  String response = '';
+  String Name = '';
+  String unitCounts = '';
+  String totalAvg = '';
+
+  Future<void> userinfo() async {
+    Socket socket = await Socket.connect("192.168.1.109", 8080);
+    socket.write('userinfo~${Id}\u0000');
+    socket.flush();
+
+    await socket.listen((socket) {
+      setState(() {
+        response = String.fromCharCodes(socket);
+        print(response);
+        List<String> list = response.split('~');
+        Name = list[0] + list[1];
+        unitCounts = list[3];
+        totalAvg = list[4];
+      });
+    });
+  }
+
+  @override
+  void initState(){
+    super.initState();
+    Id = widget.studentId;
+    // userinfo();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.teal.shade900,
       body: SafeArea(
-        child: SingleChildScrollView( // Wrap with SingleChildScrollView
+        child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
@@ -33,29 +75,19 @@ class UserProfile extends StatelessWidget {
                     children: <Widget>[
                       UserInfoField(
                         label: 'نام',
-                        initialValue: 'shamim',
-                        editable: true,
-                      ),
-                      UserInfoField(
-                        label: 'نام خانوادگی',
-                        initialValue: 'nasehi',
-                        editable: true,
+                        initialValue: Name,
                       ),
                       UserInfoField(
                         label: 'شماره دانشجویی',
-                        initialValue: '402243124',
-                        editable: true,
+                        initialValue: Id,
                       ),
                       UserInfoField(
-                        label: 'نام کاربری',
-                        initialValue: 'shamimnasehi',
-                        editable: true,
+                        label: 'تعداد واحد',
+                        initialValue: unitCounts,
                       ),
                       UserInfoField(
-                        label: 'رمز عبور',
-                        initialValue: '********',
-                        editable: true,
-                        obscureText: true,
+                        label: 'معدل',
+                        initialValue: totalAvg,
                       ),
                       SizedBox(height: 20),
                     ],
@@ -180,3 +212,4 @@ class _UserInfoFieldState extends State<UserInfoField> {
     super.dispose();
   }
 }
+

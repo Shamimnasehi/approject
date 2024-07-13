@@ -1,7 +1,25 @@
+import 'dart:io';
+import 'package:Daneshjooyar/screens/LoginPage.dart';
 import 'package:flutter/material.dart';
-import 'HomePage.dart';
 
 class SignupPage extends StatelessWidget {
+  final TextEditingController _firstNameController = TextEditingController();
+  final TextEditingController _lastNameController = TextEditingController();
+  final TextEditingController _studentIdController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  String response = '';
+
+  Future<void> signup(String name,String StudentId,String pass)async{
+    Socket socket = await Socket.connect("192.168.1.109", 8080);
+    socket.write('signup~${name}~${StudentId}~${pass}\u0000');
+    socket.flush();
+    await socket.listen((socket) {
+      response = String.fromCharCodes(socket);
+    });
+    // print('------------------ ${response} -----------------');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -95,8 +113,9 @@ class SignupPage extends StatelessWidget {
                                 ),
                               ),
                               child: TextField(
+                                controller: _firstNameController,
                                 decoration: InputDecoration(
-                                  hintText: "نام",
+                                  hintText: "نام و نام خانوادگی",
                                   hintStyle: TextStyle(
                                     color: Colors.grey.shade500,
                                     fontFamily: 'Baloo',
@@ -115,26 +134,7 @@ class SignupPage extends StatelessWidget {
                                 ),
                               ),
                               child: TextField(
-                                decoration: InputDecoration(
-                                  hintText: "نام خانوادگی",
-                                  hintStyle: TextStyle(
-                                    color: Colors.grey.shade500,
-                                    fontFamily: 'Baloo',
-                                  ),
-                                  border: InputBorder.none,
-                                ),
-                              ),
-                            ),
-                            Container(
-                              padding: EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                border: Border(
-                                  bottom: BorderSide(
-                                    color: Colors.grey.shade200,
-                                  ),
-                                ),
-                              ),
-                              child: TextField(
+                                controller: _studentIdController,
                                 decoration: InputDecoration(
                                   hintText: "شماره دانشجویی",
                                   hintStyle: TextStyle(
@@ -155,26 +155,7 @@ class SignupPage extends StatelessWidget {
                                 ),
                               ),
                               child: TextField(
-                                decoration: InputDecoration(
-                                  hintText: "نام کاربری",
-                                  hintStyle: TextStyle(
-                                    color: Colors.grey.shade500,
-                                    fontFamily: 'Baloo',
-                                  ),
-                                  border: InputBorder.none,
-                                ),
-                              ),
-                            ),
-                            Container(
-                              padding: EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                border: Border(
-                                  bottom: BorderSide(
-                                    color: Colors.grey.shade200,
-                                  ),
-                                ),
-                              ),
-                              child: TextField(
+                                controller: _passwordController,
                                 decoration: InputDecoration(
                                   hintText: "رمز عبور",
                                   hintStyle: TextStyle(
@@ -195,17 +176,20 @@ class SignupPage extends StatelessWidget {
                         color: Colors.teal.shade900,
                         borderRadius: BorderRadius.circular(10),
                         child: InkWell(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => HomePage(
-                                  name: 'shamim',
-                                  username: 'shamimnasehi',
-                                  studentId: '4022222',
+                          onTap: () async {
+                            String firstName = _firstNameController.text;
+                            String studentId = _studentIdController.text;
+                            String password = _passwordController.text;
+                            signup(firstName,
+                                studentId, password);
+                            if(response == 'not found'){
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => LoginPage()
                                 ),
-                              ),
-                            );
+                              );
+                            }
                           },
                           child: Container(
                             padding: EdgeInsets.symmetric(vertical: 15),
